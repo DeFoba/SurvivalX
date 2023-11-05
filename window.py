@@ -1,11 +1,15 @@
 from main import *
-from tkinter import Tk, Label, Button, Entry, Frame, StringVar, LEFT, messagebox, BOTTOM
+from tkinter import Tk, Label, Button, Entry, Frame, StringVar, LEFT, messagebox, BOTTOM, Text, END, Toplevel
+from tkinter.scrolledtext import ScrolledText
+from save import *
 
 # Window
 root = Tk()
-root.geometry('700x200')
+# root.geometry('700x200')
+root.minsize(700, 200)
 root.title('Player score changer')
 root.config()
+root.resizable(False, False)
 
 # Labels and Buttons
 top_frame = Frame(root)
@@ -17,12 +21,18 @@ id_status = 'text'
 
 current_player = None
 
+cur_id = StringVar(root, value='')
+# text_shower = StringVar(root, value='Inforamtion score...')
+text_field = Text(root, height=15)
+
+
 def check_id():
     global current_player
 
     try:
         show_text = 'ID ALREADY!'
         mg = messagebox.Message(root, message=show_text, title="ID Status")
+        text_field.delete(1.0, END)
 
         current_player = Player(entr1_var.get())
         if not current_player.work_id:
@@ -30,14 +40,26 @@ def check_id():
             show_text = 'ID DONT WORK!!!'
             entr1_var.set('')
             mg = messagebox.Message(root, message=show_text, title="ID Status", icon=messagebox.ERROR)
-
-        mg.show()
+            cur_id.set(entr1_var.get())
+            mg.show()
+        else:
+            cur_id.set(entr1_var.get())
+            text_field.insert(1.0, current_player.score.replace('\t', '\n'))
     
     except: pass
 
 title_f1 = Label(top_frame, text='Enter ID and click "Check"')
 entr_f1 = Entry(top_frame, textvariable=entr1_var, justify='center')
 btn_f1 = Button(top_frame, text='Check', command=check_id)
+
+
+cur_id_frame = Frame(root)
+cur_id_title = Label(cur_id_frame, text='Current ID: ')
+cur_id_id = Label(cur_id_frame, textvariable=cur_id, fg='#f0f')
+
+cur_id_frame.pack()
+cur_id_title.pack(side=LEFT)
+cur_id_id.pack(side=LEFT)
 
 # mg = messagebox.Message(root, message=id_status, title='ID status')
 
@@ -151,12 +173,44 @@ send_button.pack(fill='x')
 
 def show_score():
     try:
+        current_player._update_score()
         mg = messagebox.Message(root, message=current_player.score, title='Player information')
         mg.show()
     except: pass
 
 show_button = Button(root, text='SHOW SCORE', command=show_score)
 show_button.pack(fill='x')
+
+text_field.pack(fill='x')
+
+def window_load_save():
+    # player_id, money, vip, admin, license, ban, item_slot, item_count, hero_status
+    info = load_save()
+
+    entr1_var.set(info[0])
+    entry_var_c1.set(info[1])
+    entry_var_c2.set(info[2])
+    entry_var_c3.set(info[3])
+    entry_var_c4.set(info[4])
+    entry_var_c5.set(info[5])
+    entry_var_c6.set(info[6])
+    entry_var_c7.set(info[7])
+    entry_var_c8.set(info[8])
+
+def window_save_info():
+    save_info(entr1_var.get(), entry_var_c1.get(), entry_var_c2.get(), entry_var_c3.get(), entry_var_c4.get(), entry_var_c5.get(), entry_var_c6.get(), entry_var_c7.get(), entry_var_c8.get())
+
+btn_save = Button(root, text="Save", command=window_save_info)
+btn_save.place(x=0, y=0)
+
+window_load_save()
+
+# app = Toplevel(root)
+# app_text = ScrolledText(app, width=30, height=10)
+# app_save_btn = Button(app, text='Save')
+
+# app_text.pack()
+# app_save_btn.pack(fill='x')
 
 # Loop window
 root.mainloop()
